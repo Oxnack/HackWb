@@ -1,0 +1,45 @@
+# Базовые настройки вашего проекта и основные зависимости
+[project]
+name = "competitions"
+version = "0.1.0"
+description = "Тут могла быть ваша реклама"
+readme = "README.md"
+requires-python = ">=3.10"
+# Тут ваши зависимости. Мы добавили базовые пакеты которые могут пригодиться.
+# Чтобы добавить пакет используйте uv add <package_name>
+# Чтобы убрать используйте uv remove <package_name>
+dependencies = [
+    "numpy>=2.2.6",
+    "opencv-python",
+    "pandas>=2.3.3",
+    "pillow>=12.1.1",
+    "scikit-learn>=1.7.2",
+    "streamlit>=1.56.0",
+    "torch>=2.11.0",
+    "torchvision>=0.26.0",
+]
+
+# Эта настройка позволит вам тянуть торчевские пакеты из правильного репо (CPU версия)
+[[tool.uv.index]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cpu" # Вот тут можно поменять cpu например на cu126 и скачается версия для ГПУ
+#default = true
+explicit = true
+
+# Привязываем пакеты к установленному индексу
+[tool.uv.sources]
+torch = { index = "pytorch" }
+torchvision = { index = "pytorch" }
+torchaudio = { index = "pytorch" }
+
+# Эти зависимости не нужны нам в продакшне, поэтому мы выделили их в отдельную группу 
+# Вы можете установить их через uv sync --group jupyter 
+# Альтернативно используйте uv sync --all-groups чтобы установить всё 
+[dependency-groups]
+jupyter = [
+    "ipykernel>=7.2.0",
+    "ipywidgets>=8.1.8",
+]
+
+## Вы также можете (и рекомендуется) добавить сюда настройки для ваших линтеров и типизаторов 
+# Гуглите что такое Ruff, MyPy и прочие страшные вещи
