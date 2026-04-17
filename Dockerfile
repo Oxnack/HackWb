@@ -1,27 +1,29 @@
-FROM python:3.12-slim
-
-# 1. Системные либы для OpenCV
-RUN apt-get update && apt-get install -y \
-    libgl1 \
-    libglib2.0-0 \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# 2. Устанавливаем uv через pip (план Б из-за блокировок)
-RUN pip install uv
+FROM python:3.10-slim
 
 WORKDIR /app
 
-# 3. Копируем конфиги и ставим зависимости
-COPY pyproject.toml uv.lock ./
-RUN uv sync --frozen --no-cache
+# Установка системных зависимостей
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 
-# 4. Копируем код (теперь быстро благодаря .dockerignore)
-COPY . .
+# Копирование requirements
+COPY requirements.txt .
 
+# Установка Python зависимостей
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Копирование файлов приложения
+COPY streamlit_app.py .
+COPY models/ ./models/
+
+# Создание непривилегированного пользователя
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+USER appuser
+
+# Порт для Streamlit
 EXPOSE 8501
 
-# 5. Запуск
-ENTRYPOINT ["uv", "run", "streamlit", "run", "tutorial_inst.py", "--server.port=8501", "--server.address=0.0.0.0"]
-
-
+# Запуск приложения
+CMD ["streamlit", "run", "streamlit_app.py", "--server.address=0.0.0.0", "--server.port=8501"]
